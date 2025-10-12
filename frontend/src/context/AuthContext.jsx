@@ -1,45 +1,86 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import axiosClient from "../api/axiosClient";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axiosClient from "../api/axiosClient"; // make sure you use your pre-configured axios instance
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem("access_token"));
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            setLoading(false);
-            return;
-        }
+        const verifyToken = async () => {
+            if (!token) {
+                setLoading(false);
+                return;
+            }
 
-        axiosClient
-            .get("/user")
-            .then((res) => {
+            try {
+                const res = await axiosClient.get("/user", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 setUser(res.data);
-            })
-            .catch(() => {
-                localStorage.removeItem("token");
-                setUser(null);
-            })
-            .finally(() => setLoading(false));
-    }, []);
+                localStorage.setItem("user", JSON.stringify(res.data));
+            } catch (error) {
+                console.warn("Invalid or expired token. Logging out...");
+                handleLogout(false); // don’t navigate again on auto-logout
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const login = (token, userData) => {
-        localStorage.setItem("token", token);
-        setUser(userData);
+        verifyToken();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
+
+    const handleLogin = (newToken, newUser) => {
+        setToken(newToken);
+        setUser(newUser);
+        localStorage.setItem("access_token", newToken);
+        localStorage.setItem("user", JSON.stringify(newUser));
+        navigate("/dashboard");
     };
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        setUser(null);
+    const handleLogout = async (redirect = true) => {
+        try {
+            if (token) {
+                await axiosClient.post(
+                    "/logout",
+                    {},
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            }
+        } catch (error) {
+            console.error("Logout failed:", error);
+        } finally {
+            setToken(null);
+            setUser(null);
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("user");
+            if (redirect) navigate("/login");
+        }
     };
+
+    const value = {
+        user,
+        token,
+        login: handleLogin,
+        logout: handleLogout,
+        loading,
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex justify-center items-center text-gray-400">
+                Checking authentication...
+            </div>
+        );
+    }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
-            {children}
-        </AuthContext.Provider>
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
     );
 };
 

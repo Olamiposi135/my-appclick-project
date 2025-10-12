@@ -1,8 +1,14 @@
 import { useState } from "react";
-import axiosClient from "../api/axiosClient";
-import { useNavigate } from "react-router-dom";
 
-export default function LoginForm() {
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const API_BASE_URL =
+    (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+    "http://localhost:8000";
+
+export default function LoginForm({ onLoginSuccess }) {
     const [formData, setFormData] = useState({
         login: "", // email or username
         password: "",
@@ -34,14 +40,18 @@ export default function LoginForm() {
         }
 
         try {
-            const res = await axiosClient.post("/login", {
+            const res = await axios.post(`${API_BASE_URL}/login`, {
                 login: formData.login,
                 password: formData.password,
             });
 
             // Store token in localStorage
-            localStorage.setItem("token", res.data.access_token);
+            localStorage.setItem("access_token", res.data.access_token);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
 
+            if (onLoginSuccess) {
+                onLoginSuccess(res.data.access_token, res.data.user);
+            }
             // Redirect
             navigate("/dashboard");
         } catch (err) {
@@ -50,7 +60,7 @@ export default function LoginForm() {
             } else if (err?.response?.data?.message) {
                 setGeneralError(err.response.data.message);
             } else {
-                setGeneralError("Something went wrong. Please try again.");
+                setGeneralError("Login failed. Please try again.");
             }
         } finally {
             setSpinner(false);
@@ -130,6 +140,14 @@ export default function LoginForm() {
                         "Login"
                     )}
                 </button>
+                <p>
+                    <Link
+                        to="/forgot-password"
+                        className="text-sky-400 hover:underline"
+                    >
+                        Forgot Password?
+                    </Link>
+                </p>
 
                 <p className="text-center text-sm text-neutral-400 mt-2">
                     Don't have an account?{" "}

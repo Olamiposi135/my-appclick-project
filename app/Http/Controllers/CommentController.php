@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Validator;
 class CommentController extends Controller
 {
 
-  public function postComment(Request $request)
+  public function postComment(Request $request, $post_id)
   {
 
     $fields = Validator::make($request->all(), [
-      'post_id' => 'required|integer',
-      'comment' => 'required|string',
+
+      'content' => 'required|string',
 
     ]);
 
@@ -24,15 +24,18 @@ class CommentController extends Controller
 
     try {
 
-      $post = new Comment();
-      $post->post_id = $request->post_id;
-      $post->comment = $request->comment;
-      $post->user_id = auth()->user()->id;
-      $post->save();
+      $comment = new Comment();
+      $comment->post_id = $post_id;
+      $comment->comment = $request->content;
+      $comment->user_id = auth()->user()->id;
+      $comment->save();
+
+      // return the user that commented to frontend
+      $comment->load('user:id,username');
 
       return response()->json([
         'message' => 'Comment created successfully',
-        'comment' => $post->comment
+        'comment' => $comment
       ], 201); // 201 created
     } catch (\Exception $e) {
       return response()->json(['error' => $e->getMessage()], 403);

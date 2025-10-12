@@ -8,41 +8,40 @@ use Illuminate\Support\Facades\Validator;
 
 class LikesController extends Controller
 {
-  public function likePost(Request $request)
+  public function likePost(Request $request, $id)
   {
-
-    $fields = Validator::make($request->all(), [
-      'post_id' => 'required|integer',
-    ]);
-
-    if ($fields->fails()) {
-      return response()->json(['errors' => $fields->errors()], 403);
-    }
-
     try {
+      $user = auth()->user();
 
-      //check if user already liked the post
-      $likeCheck = Like::where('user_id', auth()->user()->id)
-        ->where('post_id', $request->post_id)
+      $existingLike = Like::where('user_id', $user->id)
+        ->where('post_id', $id)
         ->first();
 
-      if ($likeCheck) {
-        return response()->json(['message' => 'You have already liked this post'], 403);
+      if ($existingLike) {
+        $existingLike->delete();
+        $likeCount = Like::where('post_id', $id)->count();
+
+        return response()->json([
+          'message' => 'Post unliked successfully',
+          'liked' => false,
+          'likes_count' => $likeCount,
+        ]);
       } else {
+        Like::create([
+          'user_id' => $user->id,
+          'post_id' => $id,
+        ]);
 
-        $post = new Like();
-        $post->post_id = $request->post_id;
-
-        $post->user_id = auth()->user()->id;
-        $post->save();
+        $likeCount = Like::where('post_id', $id)->count();
 
         return response()->json([
           'message' => 'Post liked successfully',
-
-        ], 201);
+          'liked' => true,
+          'likes_count' => $likeCount,
+        ]);
       }
     } catch (\Exception $e) {
-      return response()->json(['error' => $e->getMessage()], 403);
+      return response()->json(['error' => $e->getMessage()], 500);
     }
   }
 }

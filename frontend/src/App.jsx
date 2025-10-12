@@ -7,19 +7,28 @@ import Footer from "./components/Footer";
 import WelcomePage from "./pages/WelcomePage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import { AuthProvider } from "./context/AuthContext";
+import Dashboard from "./pages/Dashboard";
+import EditPost from "./pages/EditPost";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const App = () => {
     return (
         <BrowserRouter>
-            <Navbar />
-            <ScrollToTop />
-            <Routes>
-                <Route path="/" element={<WelcomePage />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-            </Routes>
-            <Footer />
-            <FloatButton.BackTop />
+            <AuthProvider>
+                <Navbar />
+                <ScrollToTop />
+                <Routes>
+                    <Route path="/" element={<WelcomePage />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/edit/post/:postId" element={<EditPost />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+                <Footer />
+                <FloatButton.BackTop />
+            </AuthProvider>
         </BrowserRouter>
     );
 };

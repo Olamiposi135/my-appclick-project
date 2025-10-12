@@ -1,8 +1,14 @@
 import { useState } from "react";
 import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-export default function RegisterForm() {
+const API_BASE_URL =
+    (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+    "http://localhost:8000";
+
+export default function RegisterForm({ onRegSuccess }) {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -20,6 +26,7 @@ export default function RegisterForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSpinner(true);
 
         const newErrors = {};
         if (!formData.firstName.trim())
@@ -43,7 +50,7 @@ export default function RegisterForm() {
         }
 
         try {
-            const res = await axiosClient.post("/register", {
+            const res = await axios.post(`${API_BASE_URL}/register`, {
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 email: formData.email,
@@ -54,14 +61,21 @@ export default function RegisterForm() {
             });
 
             // Store token in localStorage
-            localStorage.setItem("token", res.data.access_token);
+            localStorage.setItem("access_token", res.data.access_token);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
+
+            if (onRegSuccess) {
+                onRegSuccess(res.data.access_token, res.data.user);
+            }
             navigate("/dashboard");
         } catch (err) {
             if (err?.response?.data?.errors) {
                 setErrorFields(err.response.data.errors);
             } else {
                 setGeneralError("Something went wrong. Please try again.");
+                setSpinner(false);
             }
+            setSpinner(false);
         }
     };
 

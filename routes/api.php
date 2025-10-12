@@ -16,7 +16,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-Route::get('/posts', [PostController::class, 'getAllPosts']);
+Route::get('/all/posts', [PostController::class, 'getAllPosts']);
 Route::get('/single/post/{post_id}', [PostController::class, 'getPost']);
 
 
@@ -27,15 +27,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
   Route::post('/add/post', [PostController::class, 'addNewPost']);
 
-  Route::put('/edit/post', [PostController::class, 'editPost']);
+  Route::put('/edit/post/{id}', [PostController::class, 'updatePost']);
 
-  Route::put('/edit/post/{post_id}', [PostController::class, 'editPost2']);
+  Route::get('/edit/post/{post_id}', [PostController::class, 'editPost']);
 
-  Route::delete('/delete/post/{post_id}', [PostController::class, 'deletePost']);
+
+  Route::get('/user/{id}/posts', [PostController::class, 'getUserPosts']);
+
+  Route::delete('/delete/post/{post}', [PostController::class, 'deletePost']);
 
   //comment route
-  Route::post('/post/comment', [CommentController::class, 'postComment']);
+  Route::post('/post/{post_id}/comment', [CommentController::class, 'postComment']);
 
 
-  Route::post('post/${post_id}/like', [LikesController::class, 'likePost']);
+  Route::post('post/{id}/like', [LikesController::class, 'likePost']);
 });

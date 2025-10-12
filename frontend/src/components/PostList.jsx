@@ -8,41 +8,19 @@ const PostList = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        let mounted = true;
-        const fetchPosts = async () => {
-            try {
-                const res = await axiosClient.get("/posts");
-                if (!res.ok) throw new Error(`Server error ${res.status}`);
-                const data = await res.json();
-                if (mounted) setPosts(data);
-            } catch (err) {
-                if (mounted) setError(err.message || "Failed to load posts");
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        };
-        fetchPosts();
-        return () => {
-            mounted = false;
-        };
+        axiosClient.get("/all/posts").then((res) => setPosts(res.data));
     }, []);
 
-    if (loading)
-        return (
-            <div className="py-20 text-center text-gray-500">
-                Loading posts...
-            </div>
-        );
-    if (error)
-        return (
-            <div className="py-20 text-center text-red-500">Error: {error}</div>
-        );
-    if (!posts || posts.length === 0)
-        return (
-            <div className="py-20 text-center text-gray-500">
-                No posts yet. Be the first to write one!
-            </div>
-        );
+    // if (loading)
+    //     return (
+    //         <div className="py-20 text-center text-gray-500">
+    //             Loading posts...
+    //         </div>
+    //     );
+    // if (error)
+    //     return (
+    //         <div className="py-20 text-center text-red-500">Error: {error}</div>
+    //     );
 
     return (
         <main className="grid grid-cols-1 md:grid-cols-2 gap-6">

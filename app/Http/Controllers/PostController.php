@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\SinglePostResource;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -32,6 +33,8 @@ class PostController extends Controller
       $post->user_id = auth()->user()->id;
       $post->save();
 
+      $post->load('user:id,username');
+
       return response()->json([
         'message' => 'Post created successfully',
         'post' => $post
@@ -41,53 +44,111 @@ class PostController extends Controller
     }
   }
 
-
-  //edit post
-
-  public function editPost(Request $request)
+  public function editPost($post_id)
   {
+    $post = Post::find($post_id);
 
-    $fields = Validator::make($request->all(), [
-      'title' => 'required|string|max:255',
-      'content' => 'required|string',
-      'post_id' => 'required|integer'
-
-    ]);
-
-    if ($fields->fails()) {
-      return response()->json(['errors' => $fields->errors()], 403);
+    if (!$post) {
+      return response()->json([
+        'error' => 'Post not found'
+      ]);
     }
 
+    if ($post->user_id !== auth()->id()) {
+      return response()->json(['error' => 'Unauthorized'], 403);
+    }
+    return response()->json(['post' => $post], 200);
+  }
+
+
+  //update post
+
+  public function updatePost(Request $request, $id)
+  {
+
+
     try {
+      $post = Post::find($id);
 
-      $post_data = Post::find($request->post_id);
-
-      if (!$post_data) {
+      if (!$post) {
         return response()->json(['error' => 'Post not found'], 404);
       }
 
-      $updated_post = $post_data->update([
-        'title' => $request->title,
-        'content' => $request->content
+      $fields = Validator::make($request->all(), [
+        'title' => 'required|string|max:255',
+        'content' => 'required|string',
       ]);
 
+      if ($fields->fails()) {
+        return response()->json(['errors' => $fields->errors()], 422);
+      }
+
+      // Ensure the post belongs to the authenticated user
+      if ($post->user_id !== auth()->id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+      }
+
+      $post->update([
+        'title' => $request->title,
+        'content' => $request->content,
+      ]);
 
       return response()->json([
         'message' => 'Post updated successfully',
-        'updatePost' => $updated_post
+        'post' => $post->fresh(),
       ], 200);
     } catch (\Exception $e) {
-      return response()->json(['error' => $e->getMessage()], 403);
+      return response()->json(['error' => $e->getMessage()], 500);
     }
   }
+
+
+
+  // fetch one user posts 
+
+  public function getUserPosts($id)
+  {
+    try {
+      $user = User::find($id);
+
+      if (!$user) {
+        return response()->json(['error' => 'User not found'], 404);
+      }
+
+      // load user posts
+      $posts = Post::with([
+        'user:id,username',
+        'comments.user:id,username',
+        'likes'
+      ])
+        ->where('user_id', $user->id)
+        ->latest()
+        ->paginate(20);
+
+      return response()->json([
+        'user' => $user->only(['id', 'username', 'email']),
+        'posts' => $posts
+      ], 200);
+    } catch (\Exception $e) {
+      return response()->json([
+        'error' => $e->getMessage()
+      ], 500);
+    }
+  }
+
+
 
 
   //Fetch all posts 
   public function getAllPosts()
   {
-
     try {
-      $posts = Post::all()->load('user', 'comments', 'likes');
+      $posts = Post::with([
+        'user:id,username',
+        'comments.user:id,username',
+        'likes',
+      ])->latest()->paginate(30);
+
       return response()->json([
         'posts' => $posts
       ], 200);
@@ -96,9 +157,10 @@ class PostController extends Controller
     }
   }
 
+
   // fetch single post with id 
 
-  // fetch single post by idz
+
   public function getPost($post_id)
   {
     try {
@@ -117,13 +179,22 @@ class PostController extends Controller
 
 
   // delete post 
-  public function deletePost($post_id)
+  public function deletePost(Post $post)
   {
     try {
-      $post = Post::find($post_id);
+
+
+
+      // Ensure the post belongs to the authenticated user
+      if ($post->user_id !== auth()->id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+      }
+
       if (!$post) {
         return response()->json(['error' => 'Post not found'], 404);
       }
+
+
       $post->delete();
       return response()->json([
         'message' => 'Post deleted successfully'
