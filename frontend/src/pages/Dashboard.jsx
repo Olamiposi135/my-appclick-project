@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import Feed from "../components/Feed";
 import { useAuth } from "../context/AuthContext";
 import ProfilePosts from "../components/ProfilePosts";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     const { user } = useAuth();
+
     const [view, setView] = useState("feed");
     return (
         <div className="min-h-screen bg-gray-50 my-20 container  mx-auto py-10 px-4">

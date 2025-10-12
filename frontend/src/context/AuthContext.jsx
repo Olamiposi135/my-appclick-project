@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosClient from "../api/axiosClient"; // make sure you use your pre-configured axios instance
+import axiosClient from "../api/axiosClient";
 
 const AuthContext = createContext(null);
 
@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }) => {
         };
 
         verifyToken();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const handleLogin = (newToken, newUser) => {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PasswordResetMail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -132,11 +133,8 @@ class AuthController extends Controller
       'created_at' => now()
     ]);
 
-    // Send email
-    Mail::send('emails.password-reset', ['token' => $token, 'email' => $request->email], function (Message $message) use ($request) {
-      $message->to($request->email);
-      $message->subject('Reset Your Password');
-    });
+    // Send email using the mailable class in Mail folder
+    Mail::to($request->email)->send(new PasswordResetMail($token, $request->email));
 
     return response()->json(['message' => 'Password reset link sent to your email.']);
   }

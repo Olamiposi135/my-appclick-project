@@ -2,18 +2,16 @@ import { useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import axiosClient from "../api/axiosClient";
 
-const API_BASE_URL =
-    (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
-    "http://localhost:8000";
-
-export default function LoginForm({ onLoginSuccess }) {
+export default function LoginForm() {
     const [formData, setFormData] = useState({
         login: "", // email or username
         password: "",
     });
 
+    const { login } = useAuth();
     const [errorFields, setErrorFields] = useState({});
     const [generalError, setGeneralError] = useState("");
     const [spinner, setSpinner] = useState(false);
@@ -40,18 +38,15 @@ export default function LoginForm({ onLoginSuccess }) {
         }
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/login`, {
+            const res = await axiosClient.post("/login", {
                 login: formData.login,
                 password: formData.password,
             });
 
-            // Store token in localStorage
-            localStorage.setItem("access_token", res.data.access_token);
-            localStorage.setItem("user", JSON.stringify(res.data.user));
+            const { access_token, user } = res.data;
 
-            if (onLoginSuccess) {
-                onLoginSuccess(res.data.access_token, res.data.user);
-            }
+            login(access_token, user);
+
             // Redirect
             navigate("/dashboard");
         } catch (err) {
@@ -142,7 +137,7 @@ export default function LoginForm({ onLoginSuccess }) {
                 </button>
                 <p>
                     <Link
-                        to="/forgot-password"
+                        to="/forgot-login/password"
                         className="text-sky-400 hover:underline"
                     >
                         Forgot Password?

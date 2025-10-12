@@ -21,7 +21,8 @@ const Navbar = () => {
         setNavbar(!navbar);
     };
 
-    const isProfile = () => {
+    const isProfile = (e) => {
+        e.stopPropagation();
         setProfile(!profile);
     };
 
@@ -43,9 +44,9 @@ const Navbar = () => {
                 setProfile(false);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("click", handleClickOutside);
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("click", handleClickOutside);
         };
     }, []);
 
@@ -93,7 +94,7 @@ const Navbar = () => {
                             </ul>
                         </div>
                     </div>
-                    {!token ? (
+                    {!user ? (
                         <div className="flex flex-col md:flex-row gap-3 mt-3 md:mt-0">
                             <Link to="/login">
                                 <button className="text-white dark:text-gray-100 text-base -lg py-2 px-4 ring-2 ring-blue-400 dark:ring-blue-700 hover:scale-95 duration-400 rounded-2xl shadow-lg focus:outline-none active:bg-blue-700 dark:active:bg-blue-900">
@@ -108,17 +109,24 @@ const Navbar = () => {
                         </div>
                     ) : (
                         <>
-                            <div className=" flex items-center gap-3 cursor-pointer text-gray-100 p-2 rounded-md hover:bg-blue-800/50 dark:hover:bg-blue-900/50 duration-300 relative">
-                                <FaUserCircle size={24} onClick={isProfile} />
+                            <div
+                                onClick={isProfile}
+                                className=" flex items-center gap-3 cursor-pointer z-50 text-gray-100 p-2 rounded-md hover:bg-blue-800/50 dark:hover:bg-blue-900/50 duration-300 relative"
+                            >
+                                {profile ? (
+                                    <FaUserCircle size={24} />
+                                ) : (
+                                    <FaUserCircle size={24} />
+                                )}
 
                                 {profile && (
                                     <div
+                                        className="absolute top-16 right-0 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600"
                                         ref={profileRef}
-                                        className="absolute top-16 right-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600"
                                     >
                                         <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
                                             <Link to="/profile">
-                                                <h3 className="font-semibold">
+                                                <h3 className="font-semibold cursor-pointer">
                                                     {`${
                                                         user?.first_name?.[0]?.toUpperCase() +
                                                         user?.first_name?.slice(
@@ -269,6 +277,7 @@ const Navbar = () => {
 
             {/* Mobile Slide-out Menu */}
             <div
+                onClick={isNavbar}
                 ref={mobileMenuRef}
                 className={`fixed top-[72px] left-0 w-full min-h-screen bg-gradient-to-r from-indigo-800 to-blue-900/95 dark:from-gray-950 dark:to-blue-950/95 backdrop-blur-sm z-40 transition-all duration-700 ${
                     navbar

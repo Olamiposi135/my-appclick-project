@@ -1,18 +1,17 @@
-<!DOCTYPE html>
-<html>
+@component('mail::message')
+  # Reset Your Password
 
-<head>
-  <title>Password Reset</title>
-</head>
+  Hi there,
 
-<body>
-  <p>Hello,</p>
-  <p>You are receiving this email because we received a password reset request for your account.</p>
-  <p>Please click the following link to reset your password:</p>
-  <p><a href="{{ url('/reset-password?token=' . $token . '&email=' . $email) }}">Reset Password</a></p>
-  <p>If you did not request a password reset, no further action is required.</p>
-  <p>Regards,</p>
-  <p>Your Application Name</p>
-</body>
+  We received a request to reset your password.
+  Click the button below to choose a new password:
 
-</html>
+  @component('mail::button', ['url' => $resetUrl])
+    Reset Password
+  @endcomponent
+
+  If you did not request a password reset, no action is required.
+
+  Thanks,
+  {{ config('app.name') }}
+@endcomponent

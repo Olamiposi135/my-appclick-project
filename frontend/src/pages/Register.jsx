@@ -2,13 +2,12 @@ import { useState } from "react";
 import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
-const API_BASE_URL =
-    (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
-    "http://localhost:8000";
+export default function RegisterForm() {
+    // Use same login logic to login new user automatically
+    const { login } = useAuth();
 
-export default function RegisterForm({ onRegSuccess }) {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -50,7 +49,7 @@ export default function RegisterForm({ onRegSuccess }) {
         }
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/register`, {
+            const res = await axiosClient.post("/register", {
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 email: formData.email,
@@ -60,13 +59,12 @@ export default function RegisterForm({ onRegSuccess }) {
                 password_confirmation: formData.confirmPassword,
             });
 
-            // Store token in localStorage
-            localStorage.setItem("access_token", res.data.access_token);
-            localStorage.setItem("user", JSON.stringify(res.data.user));
+            // get the access token from backend
+            const { access_token, user } = res.data;
 
-            if (onRegSuccess) {
-                onRegSuccess(res.data.access_token, res.data.user);
-            }
+            //login user automatically
+            login(access_token, user);
+
             navigate("/dashboard");
         } catch (err) {
             if (err?.response?.data?.errors) {
