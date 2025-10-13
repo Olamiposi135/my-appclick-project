@@ -14,11 +14,11 @@ const WelcomePage = () => {
                 <header className="mb-8 flex gap-4 items-center">
                     {user && (
                         <Link to="/dashboard">
-                            <IoHome className="text-blue-800 cursor-pointer text-2xl" />
+                            <IoHome className="text-blue-800 cursor-pointer text-2xl md:text-3xl" />
                         </Link>
                     )}
                     <div className="space-y-2.5">
-                        <h1 className="text-3xl font-extrabold text-gray-900">
+                        <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">
                             OLA Blogging Platform
                         </h1>
                         <p className=" text-lg text-gray-600">

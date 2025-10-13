@@ -67,10 +67,10 @@ const ForgotPassword = () => {
                 )}
 
                 <div className="flex items-center gap-3 my-3 ">
-                    <BackButton className=" py-2 flex-1 font-semibold " />
+                    <BackButton className=" py-2 w-fit  font-semibold  " />
                     <button
                         type="submit"
-                        className="flex-1  bg-sky-500 hover:bg-sky-400 text-white font-semibold py-2 rounded-lg transition-colors"
+                        className="flex-1  bg-sky-500 hover:bg-sky-400 text-white font-semibold py-2 rounded-2xl transition-colors"
                     >
                         {loading ? "Sending reset link" : "Recover Password"}
                     </button>

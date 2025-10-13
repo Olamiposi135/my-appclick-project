@@ -11,6 +11,7 @@ import { FaUserCircle } from "react-icons/fa";
 
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { fullNameFormat } from "../utility/fullNameFormat";
 
 const Navbar = () => {
     const [navbar, setNavbar] = useState(false);
@@ -125,22 +126,11 @@ const Navbar = () => {
                                         ref={profileRef}
                                     >
                                         <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                            <Link to="/profile">
-                                                <h3 className="font-semibold cursor-pointer">
-                                                    {`${
-                                                        user?.first_name?.[0]?.toUpperCase() +
-                                                        user?.first_name?.slice(
-                                                            1
-                                                        )
-                                                    } ${
-                                                        user?.last_name?.[0]?.toUpperCase() +
-                                                        user?.last_name?.slice(
-                                                            1
-                                                        )
-                                                    }`}
-                                                </h3>
-                                            </Link>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            <h3 className="font-semibold cursor-pointer">
+                                                {fullNameFormat(user)}
+                                            </h3>
+
+                                            <p className="text-sm truncate  text-gray-600 dark:text-gray-400">
                                                 {user?.email}
                                             </p>
                                         </div>
@@ -214,16 +204,10 @@ const Navbar = () => {
                                     <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
                                         <Link to="/profile">
                                             <h3 className="font-semibold">
-                                                {`${
-                                                    user?.first_name?.[0]?.toUpperCase() +
-                                                    user?.first_name?.slice(1)
-                                                } ${
-                                                    user?.last_name?.[0]?.toUpperCase() +
-                                                    user?.last_name?.slice(1)
-                                                }`}
+                                                {fullNameFormat(user)}
                                             </h3>
                                         </Link>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                        <p className="text-xs truncate text-gray-600 dark:text-gray-400">
                                             {user?.email}
                                         </p>
                                     </div>

@@ -33,7 +33,8 @@ class PostController extends Controller
       $post->user_id = auth()->user()->id;
       $post->save();
 
-      $post->load('user:id,username');
+      $post = Post::with('user:id,username,first_name,last_name')->find($post->id);
+
 
       return response()->json([
         'message' => 'Post created successfully',
@@ -117,7 +118,7 @@ class PostController extends Controller
 
       // load user posts
       $posts = Post::with([
-        'user:id,username',
+        'user:id,username,first_name,last_name',
         'comments.user:id,username',
         'likes'
       ])
@@ -144,7 +145,7 @@ class PostController extends Controller
   {
     try {
       $posts = Post::with([
-        'user:id,username',
+        'user:id,username,first_name,last_name',
         'comments.user:id,username',
         'likes',
       ])->latest()->paginate(30);

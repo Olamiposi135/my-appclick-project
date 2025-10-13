@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import PostCard from "./PostCard";
 import { useAuth } from "../context/AuthContext";
+import BackButton from "./BackNavBtn";
 
-const ProfilePosts = () => {
-    const { userId } = useParams(); // for public profiles
-    const { user } = useAuth(); // for logged-in user
-    const idToFetch = userId || user?.id; // auto fallback
+const UsersPosts = () => {
+    const { token } = useAuth();
+    const { userId } = useParams();
     const [posts, setPosts] = useState([]);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [nextPageUrl, setNextPageUrl] = useState(null);
+    const navigate = useNavigate();
 
-    const loadProfilePosts = async (url = `/user/${idToFetch}/posts`) => {
-        if (loading || !idToFetch) return;
+    const loadProfilePosts = async (url) => {
+        if (loading) return;
         setLoading(true);
+
+        if (!token) {
+            return navigate("/login");
+        }
 
         try {
             const res = await axiosClient.get(url);
@@ -31,20 +36,27 @@ const ProfilePosts = () => {
     };
 
     useEffect(() => {
-        setPosts([]); // reset when changing user
-        if (idToFetch) loadProfilePosts();
-    }, [idToFetch]);
+        if (!userId) return;
+        setPosts([]); // reset posts when switching users
+        loadProfilePosts(`/user/${userId}/posts`);
+    }, [userId]);
 
     return (
         <div className="container mx-auto mt-10 px-4">
+            <div>
+                <BackButton />
+            </div>
             {userData && (
-                <h2 className="text-2xl md:text-3xl font-semibold text-blue-500 my-5 italic py-4 text-center ">
+                <h2 className="text-2xl md:text-3xl font-semibold text-blue-500 my-5 italic py-4 text-center">
                     {userData.username}'s Posts
                 </h2>
             )}
 
             {posts.length === 0 && !loading && (
-                <p className="text-center text-gray-400">No posts yet.</p>
+                <div className="space-y-5">
+                    <BackButton />
+                    <p className="text-center text-gray-400">No posts yet.</p>
+                </div>
             )}
 
             {posts.map((post) => (
@@ -71,4 +83,4 @@ const ProfilePosts = () => {
     );
 };
 
-export default ProfilePosts;
+export default UsersPosts;

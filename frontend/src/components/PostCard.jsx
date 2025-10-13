@@ -3,9 +3,10 @@ import { FaRegComment } from "react-icons/fa";
 import { IoSend } from "react-icons/io5";
 import { useAuth } from "../context/AuthContext";
 import axiosClient from "../api/axiosClient";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Links } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+import { fullNameFormat } from "../utility/fullNameFormat";
 
 const PostCard = ({ post }) => {
     const { user, token } = useAuth();
@@ -40,6 +41,7 @@ const PostCard = ({ post }) => {
 
     //  toggle comment , open and close
     const handleShowComments = async () => {
+        console.log("PostCard user:", post.user);
         if (showComments) return setShowComments(false);
 
         try {
@@ -140,9 +142,15 @@ const PostCard = ({ post }) => {
                     ? post.content.slice(0, 250) + "..."
                     : post.content}
             </p>
+            <Link
+                to={`/user/${post.user.id}/posts`}
+                className="text-blue-400 font-semibold"
+            >
+                {fullNameFormat(post.user)}
+            </Link>
 
             <div className="text-sm text-neutral-400 mb-4">
-                By {post.user?.username || "Anonymous"} •{" "}
+                @{post.user?.username || "Anonymous"} •{" "}
                 {new Date(post.created_at).toLocaleDateString()}
             </div>
 

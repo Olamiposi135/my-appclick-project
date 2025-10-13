@@ -15,12 +15,14 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import GuestRoute from "./routes/GuestRoute";
 import PrivateRoute from "./routes/PrivateRoute";
+import UserPosts from "./pages/UserPosts";
 
 const App = () => {
     return (
         <BrowserRouter>
             <AuthProvider>
                 <Navbar />
+
                 <ScrollToTop />
                 <Routes>
                     <Route path="/" element={<WelcomePage />} />
@@ -47,6 +49,10 @@ const App = () => {
                         <Route
                             path="/edit/post/:postId"
                             element={<EditPost />}
+                        />
+                        <Route
+                            path="/user/:userId/posts"
+                            element={<UserPosts />}
                         />
                     </Route>
 

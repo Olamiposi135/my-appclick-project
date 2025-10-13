@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -148,7 +148,7 @@ export default function ResetPassword() {
                     type="submit"
                     className="mt-2 bg-sky-500 hover:bg-sky-400 text-white font-semibold py-2 rounded-lg transition-colors"
                 >
-                    {spinner ? "Reset Password" : "Resetting ..."}
+                    {!spinner ? "Reset Password" : "Resetting ..."}
                 </button>
 
                 <p className="text-center text-sm text-neutral-400 mt-2">

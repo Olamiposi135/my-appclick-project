@@ -26,6 +26,8 @@ class SinglePostResource extends JsonResource
 
       'author' => $this->user,
 
+
+
       'comment_count' => Comment::where('post_id', $this->id)->count(),
 
       'comments' => $this->comments->map(function ($comment) {

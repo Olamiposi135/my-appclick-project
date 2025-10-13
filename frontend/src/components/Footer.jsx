@@ -49,20 +49,20 @@ const Footer = () => {
                         </h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <Link
-                                    to="/grants/list"
+                                <a
+                                    href="#"
                                     className="text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-indigo-400 transition-colors"
                                 >
-                                    Grant Search
-                                </Link>
+                                    FAQ
+                                </a>
                             </li>
                             <li>
-                                <Link
-                                    to={"/track-application"}
+                                <a
+                                    href="#"
                                     className="text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-indigo-400 transition-colors"
                                 >
-                                    Application Status
-                                </Link>
+                                    Application Policy
+                                </a>
                             </li>
                             <li>
                                 <a
@@ -87,20 +87,20 @@ const Footer = () => {
                         <h4 className="text-md font-semibold mb-4">Support</h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <Link
-                                    to={"/contact"}
+                                <a
+                                    href="#"
                                     className="text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-indigo-400 transition-colors"
                                 >
                                     Help Center
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link
-                                    to={"/contact"}
+                                <a
+                                    href="#"
                                     className="text-gray-300 dark:text-gray-400 hover:text-white dark:hover:text-indigo-400 transition-colors"
                                 >
                                     Contact Us
-                                </Link>
+                                </a>
                             </li>
                             <li>
                                 <a
@@ -124,8 +124,8 @@ const Footer = () => {
 
                 <div className="border-t border-indigo-800 dark:border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-gray-300 dark:text-gray-400 text-sm">
-                        © {currentYear} Government Grant for Individual
-                        Solutions. All rights reserved.
+                        © {currentYear} OLA blogging platform. All rights
+                        reserved.
                     </p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
                         <a
