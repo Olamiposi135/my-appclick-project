@@ -12,7 +12,7 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-gray-50 my-20 container  mx-auto py-10 px-4">
             {user && (
-                <header className="flex flex-col lg:flex-row gap-4 justify-between items-center px-4 md:px-6 py-4 border-b border-neutral-700">
+                <header className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 justify-between items-center px-4 md:px-6 py-4 border-b border-neutral-700">
                     <h1 className="text-blue-900 text-xl md:text-2xl italic font-bold">
                         {/* reusable full name format from utility/fullnameformat */}
                         Welcome, {fullNameFormat(user)}
