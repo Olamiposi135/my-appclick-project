@@ -12,13 +12,13 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-gray-50 my-20 container  mx-auto py-10 px-4">
             {user && (
-                <header className="flex justify-between items-center px-2 md:px-6 py-4 border-b border-neutral-700">
+                <header className="flex flex-col lg:flex-row gap-4 justify-between items-center px-4 md:px-6 py-4 border-b border-neutral-700">
                     <h1 className="text-blue-900 text-xl md:text-2xl italic font-bold">
                         {/* reusable full name format from utility/fullnameformat */}
                         Welcome, {fullNameFormat(user)}
                     </h1>
 
-                    <div className="flex gap-3 flex-col md:flex-row">
+                    <div className="flex gap-3 items-start justify-start">
                         <button
                             onClick={() => setView("feed")}
                             className={`px-4 py-2 rounded-lg ${

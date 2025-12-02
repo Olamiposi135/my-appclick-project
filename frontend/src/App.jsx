@@ -16,50 +16,51 @@ import ResetPassword from "./pages/ResetPassword";
 import GuestRoute from "./routes/GuestRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import UserPosts from "./pages/UserPosts";
+import DashboardLayout from "./components/DashboardLayout";
 
 const App = () => {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <Navbar />
+                <DashboardLayout>
+                    <ScrollToTop />
+                    <Routes>
+                        <Route path="/" element={<WelcomePage />} />
 
-                <ScrollToTop />
-                <Routes>
-                    <Route path="/" element={<WelcomePage />} />
+                        {/* Guest user routes */}
 
-                    {/* Guest user routes */}
+                        <Route element={<GuestRoute />}>
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route
+                                path="/forgot-login/password"
+                                element={<ForgotPassword />}
+                            />
+                            <Route
+                                path="/reset-password"
+                                element={<ResetPassword />}
+                            />
+                        </Route>
 
-                    <Route element={<GuestRoute />}>
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route
-                            path="/forgot-login/password"
-                            element={<ForgotPassword />}
-                        />
-                        <Route
-                            path="/reset-password"
-                            element={<ResetPassword />}
-                        />
-                    </Route>
+                        {/* Authenticated users routes */}
 
-                    {/* Authenticated users routes */}
+                        <Route element={<PrivateRoute />}>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route
+                                path="/edit/post/:postId"
+                                element={<EditPost />}
+                            />
+                            <Route
+                                path="/user/:userId/posts"
+                                element={<UserPosts />}
+                            />
+                        </Route>
 
-                    <Route element={<PrivateRoute />}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route
-                            path="/edit/post/:postId"
-                            element={<EditPost />}
-                        />
-                        <Route
-                            path="/user/:userId/posts"
-                            element={<UserPosts />}
-                        />
-                    </Route>
-
-                    <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-                <Footer />
-                <FloatButton.BackTop />
+                        <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                    <Footer />
+                    <FloatButton.BackTop />
+                </DashboardLayout>
             </AuthProvider>
         </BrowserRouter>
     );
