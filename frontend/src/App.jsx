@@ -17,6 +17,7 @@ import GuestRoute from "./routes/GuestRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import UserPosts from "./pages/UserPosts";
 import DashboardLayout from "./components/DashboardLayout";
+import SettingsPage from "./pages/SettingsPage";
 
 const App = () => {
     return (
@@ -53,6 +54,10 @@ const App = () => {
                             <Route
                                 path="/user/:userId/posts"
                                 element={<UserPosts />}
+                            />
+                            <Route
+                                path="/settings"
+                                element={<SettingsPage />}
                             />
                         </Route>
 

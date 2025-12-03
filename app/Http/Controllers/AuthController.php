@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -167,5 +168,110 @@ class AuthController extends Controller
     DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
     return response()->json(['message' => 'Password has been reset successfully.']);
+  }
+
+  /**
+   * Change the password for the authenticated user. when user is logged in
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function changePassword(Request $request)
+  {
+    $request->validate([
+      'currentPassword' => ['required', 'string'],
+      'newPassword' => [
+        'required',
+        'string',
+        'min:8',
+        'confirmed',
+        'different:currentPassword'
+      ],
+    ], [
+      // current password
+      'currentPassword.required' => 'Enter your current password.',
+
+      // new password rules
+      'newPassword.required' => 'Enter a new password.',
+      'newPassword.min' => 'Your new password must be at least 8 characters.',
+      'newPassword.confirmed' => 'Your new passwords do not match.',
+      'newPassword.different' => 'Your new password must be different from your current password.',
+    ]);
+
+    $user = Auth::user();
+
+    if (!Hash::check($request->currentPassword, $user->password)) {
+      return response()->json([
+        'message' => 'Your current password is incorrect.',
+      ], 422);
+    }
+
+    $user->password = Hash::make($request->newPassword);
+    $user->save();
+
+    return response()->json([
+      'message' => 'Password changed successfully!',
+    ]);
+  }
+
+
+  // Edit profile details by auth user 
+
+  public function updateProfile(Request $request)
+  {
+    // ensure user is authenticated
+    $user = Auth::user();
+    if (! $user) {
+      return response()->json([
+        'message' => 'Unauthenticated.',
+      ], 401);
+    }
+
+    // validation rules + custom messages
+    $validator = Validator::make($request->all(), [
+      'first_name'   => 'sometimes|string|max:50',
+      'last_name'    => 'sometimes|string|max:50',
+      'email'        => 'sometimes|email|max:100|unique:users,email,' . $user->id,
+      'phone_number' => 'sometimes|string|max:20',
+    ], [
+      'first_name.string'   => 'First name must be text.',
+      'first_name.max'      => 'First name may not be greater than 50 characters.',
+      'last_name.string'    => 'Last name must be text.',
+      'last_name.max'       => 'Last name may not be greater than 50 characters.',
+      'email.email'         => 'Provide a valid email address.',
+      'email.unique'        => 'This email is already in use.',
+      'email.max'           => 'Email may not be greater than 100 characters.',
+      'phone_number.string' => 'Phone number must be text.',
+      'phone_number.max'    => 'Phone number may not be greater than 20 characters.',
+    ]);
+
+    // return validation errors (422 Unprocessable Entity)
+    if ($validator->fails()) {
+      return response()->json([
+        'message' => 'Validation failed.',
+        'errors'  => $validator->errors(), // object of field => [messages]
+      ], 422);
+    }
+
+    $validated = $validator->validated();
+
+    try {
+      // make sure User model has the fillable properties defined
+      $user->fill($validated);
+      $user->save();
+
+      return response()->json([
+        'message' => 'Profile updated successfully.',
+        'user'    => $user->fresh(), // Corrected: use fresh() to get updated model from DB
+      ], 200);
+    } catch (\Throwable $e) {
+      // log internal error for debugging (do not expose stack trace to clients)
+      Log::error('Profile update failed for user_id=' . $user->id . ' error=' . $e->getMessage());
+
+      return response()->json([
+        'message' => 'Failed to update profile. Please try again later.',
+        'errors'  => ['server' => ['An internal error occurred.']],
+      ], 500);
+    }
   }
 }

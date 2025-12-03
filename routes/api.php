@@ -41,4 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
   Route::post('post/{id}/like', [LikesController::class, 'likePost']);
+
+  // Endpoint for authenticated user to change their password
+  Route::put('/change-password', [AuthController::class, 'changePassword']);
+
+  // Endpoint for authenticated user to update their profile
+  Route::patch('/user/update-profile', [AuthController::class, 'updateProfile']);
 });

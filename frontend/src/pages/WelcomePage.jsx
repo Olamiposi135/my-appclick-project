@@ -9,7 +9,7 @@ const WelcomePage = () => {
     // show a friendly greeting when auth hook is available
     const { user } = useAuth() || {};
     return (
-        <div className="min-h-screen bg-gray-50 py-12 my-20">
+        <div className="min-h-screen bg-gray-50 py-12 ">
             <div className="max-w-5xl mx-auto px-4">
                 <header className="mb-8 flex gap-4 items-center">
                     {user && (

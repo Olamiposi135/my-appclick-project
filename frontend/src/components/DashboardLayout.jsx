@@ -1,5 +1,5 @@
 // DashboardLayout.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     BellOutlined,
     HomeFilled,
@@ -12,7 +12,7 @@ import {
     SettingFilled,
     UserOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme } from "antd";
+import { Button, Layout, Menu, Drawer, theme } from "antd";
 import { FaRegBookmark } from "react-icons/fa6";
 import { MdOutlinePostAdd } from "react-icons/md";
 import { Link } from "react-router-dom";
@@ -22,18 +22,37 @@ const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    // import auth from context folder
     const { user, token, logout } = useAuth();
 
+    // update isMobile on resize
+    useEffect(() => {
+        const mql = window.matchMedia("(max-width: 767px)");
+
+        const handleChange = (e) => setIsMobile(e.matches);
+
+        // listen to media query changes
+        if (mql.addEventListener) mql.addEventListener("change", handleChange);
+        else mql.addListener(handleChange); // fallback
+
+        // cleanup
+        return () => {
+            if (mql.removeEventListener)
+                mql.removeEventListener("change", handleChange);
+            else mql.removeListener(handleChange);
+        };
+    }, []);
+
+    // Build menu items based on auth
     let menuItems = [];
 
     if (user || token) {
-        // Logged in menu
         menuItems = [
             {
                 key: "1",
@@ -73,7 +92,6 @@ const DashboardLayout = ({ children }) => {
             { key: "8", icon: <LogoutOutlined />, label: "Logout" },
         ];
     } else {
-        // Logged out menu
         menuItems = [
             {
                 key: "9",
@@ -93,60 +111,123 @@ const DashboardLayout = ({ children }) => {
         ];
     }
 
+    const handleMenuClick = ({ key }) => {
+        if (key === "8") {
+            logout();
+        }
+
+        // close mobile drawer after click
+        if (isMobile) setDrawerOpen(false);
+    };
+
+    const renderMenu = () => (
+        <Menu
+            onClick={handleMenuClick}
+            theme="dark"
+            mode="inline"
+            items={menuItems}
+        />
+    );
+
+    // header style: fixed only for mobile so button stays sticky
+    const headerStyle = isMobile
+        ? {
+              background: "#001529",
+              height: 64,
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              padding: "0 12px",
+          }
+        : {
+              background: colorBgContainer,
+              padding: 0,
+          };
+
     return (
         <Layout style={{ minHeight: "100vh" }}>
-            <Sider
-                trigger={null}
-                collapsible
-                collapsed={collapsed}
-                style={{
-                    position: "fixed",
-                    height: "100vh",
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    zIndex: 999,
-                }}
-            >
-                <div className="demo-logo-vertical" />
-
-                <Header style={{ padding: 0 }}>
-                    <Button
-                        type="text"
-                        icon={
-                            collapsed ? (
-                                <MenuUnfoldOutlined />
-                            ) : (
-                                <MenuFoldOutlined />
-                            )
-                        }
-                        onClick={() => setCollapsed(!collapsed)}
-                        style={{
-                            fontSize: 24,
-                            width: 64,
-                            height: 64,
-                            color: "white",
-                        }}
-                    />
-                </Header>
-                <Menu
-                    onClick={({ key }) => {
-                        if (key === "8") {
-                            logout();
-                        }
+            {/* Desktop Sider (visible on non-mobile) */}
+            {!isMobile && (
+                <Sider
+                    trigger={null}
+                    collapsible
+                    collapsed={collapsed}
+                    width={200}
+                    style={{
+                        position: "fixed",
+                        height: "100vh",
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        zIndex: 999,
                     }}
-                    theme="dark"
-                    mode="inline"
-                    defaultSelectedKeys={["1"]}
-                    items={menuItems}
-                />
-            </Sider>
+                >
+                    <div style={{ height: 44 }} />{" "}
+                    {/* spacer for the header inside sider if needed */}
+                    {/* collapse button inside sider header area */}
+                    <div style={{ padding: "8px 16px" }}>
+                        <Button
+                            type="text"
+                            icon={
+                                collapsed ? (
+                                    <MenuUnfoldOutlined />
+                                ) : (
+                                    <MenuFoldOutlined />
+                                )
+                            }
+                            onClick={() => setCollapsed(!collapsed)}
+                            style={{ fontSize: 20, color: "white" }}
+                        />
+                    </div>
+                    {renderMenu()}
+                </Sider>
+            )}
 
-            <Layout>
+            {/* Mobile Drawer (visible on mobile) */}
+            {isMobile && (
+                <Drawer
+                    title="Menu"
+                    placement="left"
+                    closable
+                    onClose={() => setDrawerOpen(false)}
+                    open={drawerOpen}
+                    bodyStyle={{ padding: 0 }}
+                >
+                    {renderMenu()}
+                </Drawer>
+            )}
+
+            {/* Top header - fixed only on mobile so button sticks */}
+            <Layout
+                style={{ marginLeft: !isMobile ? (collapsed ? 80 : 200) : 0 }}
+            >
+                <Header style={headerStyle}>
+                    {/* Mobile sticky menu button */}
+                    {isMobile && (
+                        <Button
+                            type="primary"
+                            icon={<MenuUnfoldOutlined />}
+                            onClick={() => setDrawerOpen(true)}
+                            style={{ marginRight: 12 }}
+                        />
+                    )}
+
+                    {/* Optionally show a page title or other header content */}
+                    {!isMobile && (
+                        <div style={{ paddingLeft: 12, fontWeight: 600 }}>
+                            {/* you can replace with breadcrumb / title */}
+                        </div>
+                    )}
+                </Header>
+
                 <Content
                     style={{
-                        marginLeft: " 3.5rem",
-
+                        marginTop: isMobile ? 64 : 0, // push below fixed mobile header
+                        padding: "24px",
                         minHeight: 280,
                         background: colorBgContainer,
                         borderRadius: borderRadiusLG,
